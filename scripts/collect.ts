@@ -8,6 +8,7 @@
 // (원자적 rename 덕에 파일이 깨지진 않고, 늦게 쓴 쪽이 이기는 수준)
 
 import { refreshScope } from "../lib/collect";
+import { enrichDealPrices } from "../lib/enrich-prices";
 import type { Scope } from "../lib/types";
 
 const arg = process.argv.find((a) => a.startsWith("--scope="))?.split("=")[1] ?? "all";
@@ -33,4 +34,9 @@ for (const scope of scopes) {
   const head = r.allFailed ? "전 소스 실패 — 저장소 미변경" : `신규 ${r.added} · 갱신 ${r.updated} · 정리 ${r.pruned}`;
   console.log(`[${scope}] ${head} (소스 ${r.sourceOk}/${r.sourceOk + r.sourceFailed} 정상)`);
   for (const label of r.failedLabels) console.log(`  ⚠️ ${label} 실패`);
+}
+
+// 핫딜을 다뤘으면 쇼핑몰 정가 조회까지 이어서 (미시도 항목만, 예산 제한)
+if (scopes.includes("deals")) {
+  await enrichDealPrices();
 }

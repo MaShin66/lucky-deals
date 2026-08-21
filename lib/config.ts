@@ -20,6 +20,9 @@ export const DEAL_NEW_HOURS = 6;
 /** 핫딜 롤링 보관 — 마지막 목격 후 이 일수가 지나면 삭제 (흘러간 딜은 볼 이유가 없다) */
 export const DEAL_KEEP_DAYS = 3;
 
+/** 쇼핑몰 정가 조회 — 수집 1회당 시도할 딜 수 (딜당 게시글 1회 + 쇼핑몰 1회 fetch) */
+export const PRICE_ENRICH_BUDGET = 12;
+
 /** 이벤트 prune — 마감 후 30일 '그리고' 발견 후 90일이 지난 것만 삭제 (seen.mjs 규칙) */
 export const EVENT_PRUNE_END_DAYS = 30;
 export const EVENT_PRUNE_SEEN_DAYS = 90;

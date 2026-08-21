@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { refreshScope } from "@/lib/collect";
+import { enrichDealPrices } from "@/lib/enrich-prices";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,6 +30,10 @@ export async function POST(request: Request) {
     }
     if (outcome.status === "fresh") {
       return NextResponse.json({ ok: true, refreshed: false, ageMinutes: outcome.ageMinutes });
+    }
+    if (scope === "deals") {
+      // 정가 조회는 느리다(딜당 fetch 2회) — 응답을 막지 않고 뒤에서 돌린다
+      void enrichDealPrices().catch((e) => console.error("[enrich] 실패:", (e as Error).message));
     }
     return NextResponse.json({ ok: true, refreshed: true, ...outcome.result });
   } catch (error) {

@@ -17,7 +17,12 @@ export default function DealCard({
 }) {
   const fresh = !item.ended && isNew(item.firstSeenAt, now, DEAL_NEW_HOURS);
   const price = formatPrice(item.price, item.priceRaw);
-  const discount = formatDiscount(item.price, item.prevPrice);
+  // 비교 기준: 관측된 이전 가격 > 쇼핑몰 정가. 정가는 딜가보다 높을 때만 쓴다
+  // (정가가 더 낮으면 상품 페이지 미스매치 가능성이 커서 표시하지 않는다)
+  const fromList =
+    item.prevPrice == null && item.listPrice != null && item.price != null && item.listPrice > item.price;
+  const base = item.prevPrice ?? (fromList ? item.listPrice! : null);
+  const discount = formatDiscount(item.price, base);
   const badge = item.mall ?? item.origin;
 
   return (
@@ -57,7 +62,8 @@ export default function DealCard({
         <p className="mt-0.5 truncate text-xs text-zinc-500">
           {discount && (
             <span className="mr-1 text-zinc-600 line-through">
-              {item.prevPrice!.toLocaleString("ko-KR")}원
+              {fromList && "정가 "}
+              {base!.toLocaleString("ko-KR")}원
             </span>
           )}
           {price && <span className="font-semibold text-amber-300">{price}</span>}

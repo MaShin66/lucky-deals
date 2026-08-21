@@ -14,6 +14,14 @@ import * as ppomppuDeal from './deals/ppomppu-deal.mjs';
 import * as algumon from './deals/algumon.mjs';
 import * as quasarzone from './deals/quasarzone.mjs';
 import * as ruliweb from './deals/ruliweb.mjs';
+import * as eleven from './malls/eleven.mjs';
+import * as lotteon from './malls/lotteon.mjs';
+import * as jsonld from './malls/jsonld.mjs';
 
 export const EVENT_SOURCES = [ppomppuEvent];
 export const DEAL_SOURCES = [ppomppuDeal, algumon, quasarzone, ruliweb];
+
+// 쇼핑몰 가격 어댑터 (collector/malls/*.mjs) — 계약: meta {id,label,hosts} + fetchPrice(url)
+// hosts '*'(JSON-LD 공통 폴백)는 반드시 맨 끝 — 전용 어댑터가 먼저 매칭돼야 한다.
+// 지마켓(403)·네이버(429)는 봇 차단이라 미지원 (우회 금지 원칙).
+export const MALL_SOURCES = [eleven, lotteon, jsonld];

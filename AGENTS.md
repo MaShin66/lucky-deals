@@ -21,6 +21,7 @@ Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배�
 - 저장: `data/*.json` (gitignore, 임시파일+rename 원자적 쓰기). 쓰기 경합은 `lib/lock.ts`의 `withStoreLock` 직렬화 큐로 해결 (수집 병합 vs PATCH).
 - `/api/state` PATCH는 **updatedAt을 건드리면 안 된다** — updatedAt은 수집 신선도라 TTL 판단이 오염됨.
 - **가격 이력(prevPrice)**: 커뮤니티 글엔 정가가 없다. `data/price-memory.json`이 상품 지문(fp)별 마지막 관측가를 90일 기억하고, 같은 상품이 다른 가격으로 다시 뜨면(또는 같은 딜의 제목 가격이 수정되면) prevPrice로 붙는다 — "~~17,230원~~ 13,250원 23%↓". 데이터가 쌓일수록 좋아지는 구조. fp 기억 갱신은 collectDeals에서만(runExclusive 아래) 일어난다.
+- **쇼핑몰 정가(listPrice)**: 게시글 본문 링크를 풀어(`collector/lib/post-link.mjs` — 래퍼가 전부 로컬 디코드로 풀림, HTTP 추가 요청 없음) 몰 페이지에서 정가를 직접 읽는다(`lib/enrich-prices.ts` + `collector/malls/*.mjs`, registry의 MALL_SOURCES). 수집의 후속 단계로만 돈다 — 버튼 응답은 fire-and-forget, cron·부팅·CLI는 await. 실행당 `PRICE_ENRICH_BUDGET`(12)건, 딜당 fetch 2회(게시글+몰). listPrice 의미론: **필드 없음=미시도, null=실패(재시도 안 함)**. 몰 대표가는 다른 옵션일 수 있어 **딜가의 0.8~2.5배 창 밖이면 버린다**(`chooseListPrice` — 롯데온 실측: 대표옵션 68,100 vs 딜 18,900). 표시는 prevPrice 없을 때만 "정가 ~~N원~~". 여기서도 updatedAt은 불변. 몰 지원: 11번가(정가+판매가 SSR)·롯데온(판매가만) + JSON-LD 공통 폴백. 지마켓 403·네이버 429 차단이라 미지원(우회 금지).
 - **참여 방식(joinType)은 저장하지 않는다** — events/page.tsx가 읽을 때마다 제목에서 유도(`classifyJoinType`). 분류 규칙을 고치면 기존 항목에도 소급된다. prizeType은 반대로 수집 시점에 저장됨(비대칭 의도적).
 
 ## 수집기 (collector/, 검증된 .mjs — car-event 어댑터 계약)
@@ -37,6 +38,7 @@ Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배�
 - **알구몬**: 짧은 간격 연타 시 SSR 대신 2.8KB 빈 셸(스로틀, 차단 아님) — 정상 주기에선 회복. optional이라 실패해도 조용함. Svelte 하이드레이션 주석이 태그 사이에 끼므로 파싱 전에 주석 제거. 링크는 만료되는 `/n/d/{id}?enc=` 말고 `/n/deal/{id}`.
 - **퀘이사존**: `<span class="label">진행중|인기|종료</span>`가 구조적 종료 신호 (제목 마커보다 확실). '공지' 라벨 행은 버림.
 - **루리웹** (`market/board/1020`, UTF-8·SSR): 목록 제목이 ~40자에서 잘리고 리터럴 `...`이 붙는다(전체 제목 백업 없음) — 어댑터의 `fixTruncatedTitle`이 collect 전에 괄호를 닫아야 가격 파싱과 fingerprint 병합이 같이 산다(숫자 중간 절단은 괄호째 버림). 실제 글 행은 정확히 `<tr class="table_body blocktarget">` — 공지/베스트는 ` inside`가 붙어 exact split로 배제. href는 페이지마다 쿼리가 달라 `/read/{id}`로 재조립. 시각은 오늘 "HH:MM"/이전 "YYYY.MM.DD" 두 형식뿐. 구조적 종료 라벨 없음(제목 마커 전용). robots.txt가 `cate=`·`orderby=` 크롤 금지(`?page=`는 허용).
+- **게시글 상품링크 래퍼** (`post-link.mjs`): 뽐뿌 `topTitle-link`의 **href엔 따옴표가 없다**(`href=https://s.ppomppu…` — `["']?` 없인 전량 미스), `target=`이 base64. 루리웹은 본문 위에 광고 앵커가 먼저 나와 `div.source_url`로 스코프 필수(`ol=` URL인코딩). 퀘이사존은 `goToLink('base64')`가 페이지 유일 — 아웃바운드 앵커 스캔은 푸터 스폰서 150+개라 금지. 알구몬 `enc=`는 복호화 불가·3xx도 아님(200/Location null) → 미지원.
 - 이벤트 탭 대안 소스 탐색 결과: 위비티 이벤트섹션 사멸(전체 15건·접수중 0), 콘테스트코리아 이벤트 카테고리 없음, 클리앙/인벤 404. 루리웹 핫딜은 "알구몬이 재집계해서 미채택"이었다가 2026-08-21 딜 소스로 직접 채택 — 원글 직수집이 안정 링크·정확한 시각·추천수를 주고, 알구몬과의 중복은 priority 병합이 해소한다.
 
 ## 코딩 규칙

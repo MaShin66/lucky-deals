@@ -53,6 +53,18 @@ export interface DealAdapter {
   fetchItems(): Promise<RawDealItem[]>;
 }
 
+/** 쇼핑몰 상품 페이지에서 읽은 가격 (collector/malls/*.mjs 계약) */
+export interface MallPrice {
+  /** 쇼핑몰이 표시하는 정가(취소선가). 없으면 null */
+  listPrice: number | null;
+  /** 현재 판매가 */
+  salePrice: number | null;
+}
+export interface MallAdapter {
+  meta: { id: string; label: string; hosts: string[] };
+  fetchPrice(url: string): Promise<MallPrice>;
+}
+
 // ── 저장 항목 ────────────────────────────────────────────────
 
 export type PrizeType =
@@ -91,6 +103,10 @@ export interface DealItem {
   price: number | null;
   /** 직전에 관측된 가격 — 같은 딜의 가격 수정, 또는 같은 상품(fp)의 지난 딜 가격 */
   prevPrice: number | null;
+  /** 쇼핑몰 페이지에서 직접 읽은 정가. 필드 없음=미시도, null=시도했으나 실패 (재시도 안 함) */
+  listPrice?: number | null;
+  /** 게시글 본문에서 풀어낸 쇼핑몰 상품 URL */
+  productUrl?: string | null;
   priceRaw: string | null;
   shipping: string | null;
   votes: number | null;
