@@ -1,0 +1,11 @@
+# deps / build
+node_modules/
+.next/
+next-env.d.ts
+
+# 개인 상태 (원장·수집 산출물)
+data/
+
+# misc
+.DS_Store
+*.tsbuildinfo
