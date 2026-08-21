@@ -1,7 +1,8 @@
 # lucky-deals (럭키딜)
 
-경품 응모 이벤트(탭1)와 커뮤니티 핫딜(탭2)을 한 화면에서 보는 **개인용 로컬 사이트**.
-Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배포 없음.
+경품 응모 이벤트(탭1)와 커뮤니티 핫딜(탭2)을 한 화면에서 보는 **개인용 사이트**.
+Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.**
+로컬이 본체(수집·원장), GitHub Pages는 **읽기 전용 스냅샷 거울**이다.
 
 ## 실행
 
@@ -9,6 +10,16 @@ Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배�
 - `npm run collect [-- --scope=events|deals] [--force]` — 서버 없이 수동 수집.
   **dev 서버를 켠 채 CLI 수집 금지** — 프로세스가 달라 잠금 밖이다 (파일 파손은 없고 늦게 쓴 쪽이 이김).
 - `npm test` — 필터·파싱 회귀 테스트
+- `npm run deploy` — 정적 빌드 + gh-pages 푸시 → https://mashin66.github.io/lucky-deals/
+  (공개 저장소 `MaShin66/lucky-deals`. 무료 플랜은 비공개 저장소에 Pages를 못 붙인다.)
+
+## 정적 배포 (GitHub Pages)
+
+- **스냅샷이다.** 사이트 데이터는 `npm run deploy` 시점의 `data/*.json`이 HTML에 구워진 것 — 갱신은 로컬에서 수집 후 다시 deploy 하는 것뿐이다(크론·서버 수집 없음).
+- `STATIC_EXPORT=1`일 때만 `output: "export"`. **`pageExtensions: ["tsx"]`가 API 라우트 제외 트릭** — route.ts만 `.ts`라 통째로 빠진다(파일 이동 불필요).
+- 서버가 없으니 응모완료·숨김은 **localStorage**로 간다(`lib/local-state.ts`, `IS_STATIC` 분기). 새로고침 버튼은 숨기고, 루트 redirect는 클라이언트 이동으로 대체.
+- **페이지에 `dynamic = "force-dynamic"`을 두면 안 된다** — 리터럴만 허용돼서 export와 양립 불가. dev는 매 요청 재렌더라 수집 결과가 바로 보인다(제거해도 무영향).
+- 사이트는 URL을 아는 누구나 볼 수 있다(Pages 특성). `public/robots.txt`로 색인만 막아둠. 개인 기록은 localStorage라 서버·저장소에 안 남는다.
 
 ## 아키텍처 (funny-world 골격 + car-event-scripts 수집 계층)
 
