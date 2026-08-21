@@ -13,8 +13,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full">
         <div className="mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-6">
-          <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <Link href="/" className="text-xl font-bold tracking-tight">
+          <header className="mb-6">
+            <Link href="/" className="mb-4 inline-block text-xl font-bold tracking-tight">
               🍀 럭키딜
             </Link>
             <TabNav />

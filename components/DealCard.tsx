@@ -1,7 +1,7 @@
 "use client";
 
 import { DEAL_NEW_HOURS } from "@/lib/config";
-import { formatPrice, isNew, relativeTime } from "@/lib/format";
+import { formatDiscount, formatPrice, isNew, relativeTime } from "@/lib/format";
 import type { DealItem } from "@/lib/types";
 
 export type DealRow = DealItem & { key: string };
@@ -17,6 +17,7 @@ export default function DealCard({
 }) {
   const fresh = !item.ended && isNew(item.firstSeenAt, now, DEAL_NEW_HOURS);
   const price = formatPrice(item.price, item.priceRaw);
+  const discount = formatDiscount(item.price, item.prevPrice);
   const badge = item.mall ?? item.origin;
 
   return (
@@ -54,15 +55,17 @@ export default function DealCard({
           )}
         </div>
         <p className="mt-0.5 truncate text-xs text-zinc-500">
-          {item.prevPrice != null && item.price != null && item.prevPrice !== item.price && (
+          {discount && (
             <span className="mr-1 text-zinc-600 line-through">
-              {item.prevPrice.toLocaleString("ko-KR")}원
+              {item.prevPrice!.toLocaleString("ko-KR")}원
             </span>
           )}
           {price && <span className="font-semibold text-amber-300">{price}</span>}
-          {item.prevPrice != null && item.price != null && item.prevPrice > item.price && (
-            <span className="ml-1 font-semibold text-rose-400">
-              {Math.round((1 - item.price / item.prevPrice) * 100)}%↓
+          {discount && (
+            <span
+              className={`ml-1 font-semibold ${discount.dir === "down" ? "text-rose-400" : "text-zinc-500"}`}
+            >
+              {discount.text}
             </span>
           )}
           {item.shipping && <> · 배송 {item.shipping}</>}

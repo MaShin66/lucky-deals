@@ -34,6 +34,24 @@ export function formatPrice(price: number | null, priceRaw: string | null): stri
   return priceRaw;
 }
 
+/**
+ * prevPrice 대비 얼마나 변했는지 — "3,980원·23%↓"(인하) / "2,100원·21%↑"(인상).
+ * 변동폭이 1% 미만이면 %는 생략하고 금액만. 비교 불가·변동 없음은 null.
+ */
+export function formatDiscount(
+  price: number | null,
+  prevPrice: number | null,
+): { text: string; dir: "down" | "up" } | null {
+  if (price == null || prevPrice == null || prevPrice <= 0 || price < 0 || price === prevPrice) return null;
+  const diff = Math.abs(prevPrice - price);
+  const pct = Math.round((diff / prevPrice) * 100);
+  const arrow = price < prevPrice ? "↓" : "↑";
+  return {
+    text: pct > 0 ? `${diff.toLocaleString("ko-KR")}원·${pct}%${arrow}` : `${diff.toLocaleString("ko-KR")}원${arrow}`,
+    dir: price < prevPrice ? "down" : "up",
+  };
+}
+
 export function isNew(firstSeenAt: string, nowMs: number, hours: number): boolean {
   const t = Date.parse(firstSeenAt);
   return !Number.isNaN(t) && nowMs - t < hours * HOUR;
