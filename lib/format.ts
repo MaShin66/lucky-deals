@@ -92,3 +92,15 @@ export const PRIZE_EMOJI: Record<string, string> = {
   "식품·뷰티": "🧴",
   기타: "🎁",
 };
+
+export const DEAL_CATEGORY_EMOJI: Record<string, string> = {
+  "식품·건강": "🍜",
+  "생활·주방": "🧻",
+  "가전·디지털": "📱",
+  "PC·하드웨어": "🖥️",
+  게임: "🎮",
+  "패션·뷰티": "👕",
+  "상품권·쿠폰": "🎫",
+  "취미·레저": "🎣",
+  기타: "📦",
+};

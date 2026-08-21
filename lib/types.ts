@@ -128,6 +128,18 @@ export interface PriceMemory {
   items: Record<string, { price: number; date: string }>;
 }
 
+/** 핫딜 물품 종류 — 저장하지 않고 원시 category+제목에서 매번 유도 (joinType과 같은 원칙) */
+export type DealCategory =
+  | "식품·건강"
+  | "생활·주방"
+  | "가전·디지털"
+  | "PC·하드웨어"
+  | "게임"
+  | "패션·뷰티"
+  | "상품권·쿠폰"
+  | "취미·레저"
+  | "기타";
+
 /** 참여 방식 분류 — 저장하지 않고 제목에서 매번 유도한다 (규칙 수정이 소급 적용되게) */
 export type JoinType =
   | "퀴즈·게임"

@@ -2,9 +2,9 @@
 
 import { DEAL_NEW_HOURS } from "@/lib/config";
 import { formatDiscount, formatPrice, isNew, relativeTime } from "@/lib/format";
-import type { DealItem } from "@/lib/types";
+import type { DealCategory, DealItem } from "@/lib/types";
 
-export type DealRow = DealItem & { key: string };
+export type DealRow = DealItem & { key: string; dealCategory: DealCategory };
 
 export default function DealCard({
   item,

@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start --port 4200",
     "collect": "tsx scripts/collect.ts",
-    "test": "tsx scripts/test-filter.ts && tsx scripts/test-parse-deal.ts && tsx scripts/test-format.ts && tsx scripts/test-enrich.ts"
+    "test": "tsx scripts/test-filter.ts && tsx scripts/test-parse-deal.ts && tsx scripts/test-format.ts && tsx scripts/test-enrich.ts && tsx scripts/test-deal-category.ts"
   },
   "dependencies": {
     "next": "16.3.1",

@@ -22,7 +22,7 @@ Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배�
 - `/api/state` PATCH는 **updatedAt을 건드리면 안 된다** — updatedAt은 수집 신선도라 TTL 판단이 오염됨.
 - **가격 이력(prevPrice)**: 커뮤니티 글엔 정가가 없다. `data/price-memory.json`이 상품 지문(fp)별 마지막 관측가를 90일 기억하고, 같은 상품이 다른 가격으로 다시 뜨면(또는 같은 딜의 제목 가격이 수정되면) prevPrice로 붙는다 — "~~17,230원~~ 13,250원 23%↓". 데이터가 쌓일수록 좋아지는 구조. fp 기억 갱신은 collectDeals에서만(runExclusive 아래) 일어난다.
 - **쇼핑몰 정가(listPrice)**: 게시글 본문 링크를 풀어(`collector/lib/post-link.mjs` — 래퍼가 전부 로컬 디코드로 풀림, HTTP 추가 요청 없음) 몰 페이지에서 정가를 직접 읽는다(`lib/enrich-prices.ts` + `collector/malls/*.mjs`, registry의 MALL_SOURCES). 수집의 후속 단계로만 돈다 — 버튼 응답은 fire-and-forget, cron·부팅·CLI는 await. 실행당 `PRICE_ENRICH_BUDGET`(12)건, 딜당 fetch 2회(게시글+몰). listPrice 의미론: **필드 없음=미시도, null=실패(재시도 안 함)**. 몰 대표가는 다른 옵션일 수 있어 **딜가의 0.8~2.5배 창 밖이면 버린다**(`chooseListPrice` — 롯데온 실측: 대표옵션 68,100 vs 딜 18,900). 표시는 prevPrice 없을 때만 "정가 ~~N원~~". 여기서도 updatedAt은 불변. 몰 지원: 11번가(정가+판매가 SSR)·롯데온(판매가만) + JSON-LD 공통 폴백. 지마켓 403·네이버 429 차단이라 미지원(우회 금지).
-- **참여 방식(joinType)은 저장하지 않는다** — events/page.tsx가 읽을 때마다 제목에서 유도(`classifyJoinType`). 분류 규칙을 고치면 기존 항목에도 소급된다. prizeType은 반대로 수집 시점에 저장됨(비대칭 의도적).
+- **참여 방식(joinType)은 저장하지 않는다** — events/page.tsx가 읽을 때마다 제목에서 유도(`classifyJoinType`). 분류 규칙을 고치면 기존 항목에도 소급된다. prizeType은 반대로 수집 시점에 저장됨(비대칭 의도적). 핫딜 물품 종류(dealCategory)도 같은 원칙 — deals/page.tsx가 원시 category+제목+몰에서 유도(`lib/deal-category.ts`). 소스별 카테고리 어휘가 제각각(음식/식품·건강/생활·식품…)이라 통합 버킷 9종으로 정규화하고, 애매한 원시값(기타·생활/식품·PC/가전·null)만 제목 규칙을 탄다.
 
 ## 수집기 (collector/, 검증된 .mjs — car-event 어댑터 계약)
 
