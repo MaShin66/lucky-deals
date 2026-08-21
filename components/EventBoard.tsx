@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DateDivider from "./DateDivider";
 import EventCard, { type EventRow } from "./EventCard";
 import SearchBox from "./SearchBox";
 import { PRIZE_EMOJI, dateHeaderLabel, daysLeft, kstDateKey, shortDateLabel } from "@/lib/format";
+import { IS_STATIC, type LocalState, localKey, readLocalState, writeLocalPatch } from "@/lib/local-state";
 
 const STATUS_TABS = [
   { id: "todo", label: "미응모" },
@@ -17,9 +18,19 @@ type StatusTab = (typeof STATUS_TABS)[number]["id"];
 
 type Row = { type: "header"; id: string; label: string } | { type: "item"; item: EventRow };
 
-export default function EventBoard({ items, now }: { items: EventRow[]; now: number }) {
+export default function EventBoard({ items: rawItems, now }: { items: EventRow[]; now: number }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  // 정적 배포엔 서버가 없다 — 응모완료·숨김을 localStorage에서 덧씌운다.
+  // 하이드레이션 이후에 읽어야 서버 HTML과 어긋나지 않는다.
+  const [local, setLocal] = useState<LocalState>({});
+  useEffect(() => {
+    if (IS_STATIC) setLocal(readLocalState());
+  }, []);
+  const items = useMemo(
+    () => (IS_STATIC ? rawItems.map((it) => ({ ...it, ...local[localKey("events", it.key)] })) : rawItems),
+    [rawItems, local],
+  );
   const [statusTab, setStatusTab] = useState<StatusTab>("todo");
   const [prize, setPrize] = useState<string | null>(null);
   const [join, setJoin] = useState<string | null>(null);
@@ -105,6 +116,10 @@ export default function EventBoard({ items, now }: { items: EventRow[]; now: num
   }, [filtered, sort, now]);
 
   async function patch(key: string, body: { entered?: string | null; hidden?: boolean }) {
+    if (IS_STATIC) {
+      setLocal(writeLocalPatch("events", key, body));
+      return;
+    }
     await fetch("/api/state", {
       method: "PATCH",
       headers: { "content-type": "application/json" },

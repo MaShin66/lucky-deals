@@ -9,3 +9,7 @@ data/
 # misc
 .DS_Store
 *.tsbuildinfo
+
+# 정적 배포 산출물
+out/
+.deploy-pages/

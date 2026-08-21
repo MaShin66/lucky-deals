@@ -1,17 +1,27 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DateDivider from "./DateDivider";
 import DealCard, { type DealRow } from "./DealCard";
 import SearchBox from "./SearchBox";
 import { DEAL_CATEGORY_EMOJI, dateHeaderLabel, kstDateKey } from "@/lib/format";
+import { IS_STATIC, type LocalState, localKey, readLocalState, writeLocalPatch } from "@/lib/local-state";
 
 type Row = { type: "header"; id: string; label: string } | { type: "item"; item: DealRow };
 
-export default function DealBoard({ items, now }: { items: DealRow[]; now: number }) {
+export default function DealBoard({ items: rawItems, now }: { items: DealRow[]; now: number }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
+  // 정적 배포엔 서버가 없다 — 숨김 상태를 localStorage에서 덧씌운다 (하이드레이션 후 읽는다)
+  const [local, setLocal] = useState<LocalState>({});
+  useEffect(() => {
+    if (IS_STATIC) setLocal(readLocalState());
+  }, []);
+  const items = useMemo(
+    () => (IS_STATIC ? rawItems.map((it) => ({ ...it, ...local[localKey("deals", it.key)] })) : rawItems),
+    [rawItems, local],
+  );
   const [source, setSource] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<"new" | "votes">("new");
@@ -78,6 +88,10 @@ export default function DealBoard({ items, now }: { items: DealRow[]; now: numbe
   }, [filtered, sort, now]);
 
   async function toggleHidden(key: string, hidden: boolean) {
+    if (IS_STATIC) {
+      setLocal(writeLocalPatch("deals", key, { hidden }));
+      return;
+    }
     await fetch("/api/state", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
