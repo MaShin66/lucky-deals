@@ -12,9 +12,9 @@ Next.js 16 App Router + React 19 + Tailwind 4 + TS. **포트 4200 고정.** 배�
 
 ## 아키텍처 (funny-world 골격 + car-event-scripts 수집 계층)
 
-- **갱신 전략이 탭마다 다르다.**
-  - 이벤트: node-cron 매일 08:00 + 서버 부팅 시 20h 초과면 즉시 수집 (`lib/scheduler.ts`, `instrumentation.ts`)
-  - 핫딜: cron 없음. 페이지 접근 시 클라이언트(`AutoRevalidate`)가 `POST /api/refresh` → 서버가 TTL(15분) 판단 후 수집. TTL 판단이 전부 서버라 탭 여러 개 열어도 중복 수집 없음.
+- **갱신 전략: 두 탭 다 cron + 부팅 보충 + 수동 버튼** (`lib/scheduler.ts`, `instrumentation.ts`)
+  - 이벤트 매일 08:00, 핫딜 매일 00:00. 서버 부팅 시 20h 초과면 즉시 수집(예약 시각에 서버가 꺼져 있던 날 보충). cron은 dev 서버가 켜져 있어야 돈다(배포 없음).
+  - **페이지 접근·새로고침은 수집을 트리거하지 않는다** — 2026-08-21 `AutoRevalidate`(접근 시 TTL 수집) 제거, 사용자 결정. 새로고침 버튼만 `POST /api/refresh {force:true}`로 즉시 수집. TTL(15분)은 force 아닌 요청(CLI 등)의 가드로만 남음.
 - **원장 의미론이 탭마다 다르다** (`lib/merge-*.ts`).
   - 이벤트 = write-once: 있으면 안 건드림 → entered/hidden 보존이 공짜. prune은 마감+30일 && 발견+90일.
   - 핫딜 = 3일 롤링: 가변 필드(votes·가격·ended)만 갱신, firstSeenAt·hidden 보존. **리스트 소멸 ≠ 종료** (1~2페이지만 보므로 밀려난 딜을 종료로 오판) — 종료는 제목 마커·퀘이사존 label로만, 소멸은 3일 prune으로만.

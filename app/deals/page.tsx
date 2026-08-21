@@ -1,4 +1,3 @@
-import AutoRevalidate from "@/components/AutoRevalidate";
 import DealBoard from "@/components/DealBoard";
 import RefreshButton from "@/components/RefreshButton";
 import SourceStatusLine from "@/components/SourceStatusLine";
@@ -14,10 +13,7 @@ export default async function DealsPage() {
   return (
     <main className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <SourceStatusLine statuses={status.deals} updatedAt={store.updatedAt} now={now} />
-          <AutoRevalidate scope="deals" />
-        </div>
+        <SourceStatusLine statuses={status.deals} updatedAt={store.updatedAt} now={now} />
         <RefreshButton scope="deals" />
       </div>
       <DealBoard items={items} now={now} />

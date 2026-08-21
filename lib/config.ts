@@ -1,12 +1,16 @@
 export const TIMEZONE = "Asia/Seoul";
 
-/** 이벤트 수집: 매일 08:00 (핫딜은 cron 없음 — 페이지 접근 시 TTL 검사) */
+/** 이벤트 수집: 매일 08:00 */
 export const EVENTS_CRON = "0 8 * * *";
 
-/** 마지막 이벤트 수집이 이 시간보다 오래됐으면 서버 시작 시 즉시 수집 */
-export const EVENTS_STALE_HOURS = 20;
+/** 핫딜 수집: 매일 00:00 — 페이지 접근은 수집을 트리거하지 않는다(2026-08-21 결정, 버튼·cron만) */
+export const DEALS_CRON = "0 0 * * *";
 
-/** 핫딜 on-demand 수집 간격 — 페이지를 열 때 이보다 낡았으면 다시 긁는다 */
+/** 마지막 수집이 이 시간보다 오래됐으면 서버 시작 시 즉시 수집 (예약 시각에 서버가 꺼져 있던 날 보충) */
+export const EVENTS_STALE_HOURS = 20;
+export const DEALS_STALE_HOURS = 20;
+
+/** force 아닌 수집 요청(CLI 등)의 재수집 가드 간격 */
 export const DEALS_TTL_MINUTES = 15;
 
 /** NEW 뱃지 기준 */
