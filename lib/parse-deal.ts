@@ -12,7 +12,9 @@ export interface ParsedDeal {
   cleanTitle: string;
 }
 
-const ENDED_WORD = /종료|품절|매진|완판/;
+// '삭제'는 글쓴이가 딜을 접으며 제목을 통째로 지운 흔적 (퀘이사존 실측: "[롯데온] 삭제" —
+// label은 '종료'가 안 되고 가격 컬럼만 남는다). '펑'과 같은 부류라 종료로 취급한다.
+const ENDED_WORD = /종료|품절|매진|완판|삭제/;
 // '펑'(글쓴이가 딜을 접었다는 은어)은 한 글자라 단어 경계를 잡아준다
 const ENDED_PUNG = /(?:^|[\s[(/])펑(?:[\s\])/]|$)/;
 
